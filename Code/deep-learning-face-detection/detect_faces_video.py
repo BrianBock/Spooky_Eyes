@@ -38,10 +38,9 @@ vs = VideoStream(src=0).start()
 time.sleep(2.0)
 
 
-
-
 # loop over the frames from the video stream
 while True:
+	isFace = False
 	left_eye.color = color
 	right_eye.color = color
 	# grab the frame from the threaded video stream and resize it
@@ -59,6 +58,7 @@ while True:
 	net.setInput(blob)
 	detections = net.forward()
 	# loop over the detections
+
 	for i in range(0, detections.shape[2]):
 		# extract the confidence (i.e., probability) associated with the
 		# prediction
@@ -66,10 +66,14 @@ while True:
 
 		# filter out weak detections by ensuring the `confidence` is
 		# greater than the minimum confidence
-		if confidence < args["confidence"]:
-			continue
-		color = red
+		if confidence > args["confidence"]:
+			isFace = True
+
+
+	if isFace:
 		print("I see a face!")
+		color = red
+				# print("I see a face!")
 		# compute the (x, y)-coordinates of the bounding box for the
 		# object
 		box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -83,6 +87,9 @@ while True:
 			(0, 0, 255), 2)
 		cv2.putText(frame, text, (startX, y),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+	else:
+		print("no face")
+		color = blue
 
 	# show the output frame
 	cv2.imshow("Frame", frame)
